@@ -7,23 +7,31 @@ const connect= mongoose.connect(url,{useNewUrlParser:true})
 connect.then((db)=>{
     console.log('connect to srever successfully');
 
-    var newdish = new Dishes({
-        name:'uthapizza',
+    Dishes.create({
+        name:'uthapizzanew',
         description:'test'
-    });
-
-    newdish.save().then((dish)=>{
-        console.log(dish);
-        return Dishes.find({});
     })
-    .then((dishes)=>{
-        console.log(dishes);
-        return Dishes.remove({});
+    .then((dish)=>{
+        console.log(dish);
+        return Dishes.findOneAndUpdate(dish._id,{$set:{description:'updated test'}},{new:true}).exec()
+    })
+    .then((dish)=>{
+        console.log(dish);
+        dish.comments.push({
+            rating: 5,
+            comment: 'I\'m getting a sinking feeling!',
+            author: 'Leonardo di Carpaccio'
+        });
+        return dish.save();
+    })
+    .then((dish)=>{
+        console.log('dish');
+        return db.Collection('dishes').drop();
     })
     .then(()=>{
-        return mongoose.connection.close();
+        return db.close();
     })
-    .catch(()=>{
-        confirm.log(err);
+    .catch((err)=>{
+        console.log(err);
     });
 });
