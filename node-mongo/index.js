@@ -7,13 +7,14 @@ console.log("Connected to Database");
     console.log("Not Connected to Database ERROR! ", err);
 });*/
 
-//const url='mongodb://localhost:27071/COnfusionDatabase';
+const url='mongodb://localhost/COnfusionDatabase';
 
 const dboper = require('./operation');
 
 const dbname='COnfusionDatabase';
-MongoClient.connect('mongodb://localhost/COnfusionDatabase',{ useNewUrlParser: true },(err,client)=>{
-    assert.equal(err,null);
+//MongoClient.connect('mongodb://localhost/COnfusionDatabase',{ useNewUrlParser: true },(err,client)=>{
+    //assert.equal(err,null);
+    MongoClient.connect(url,{useNewUrlParser: true}).then((client) => {
     console.log('connected correctly to server');
 
     const db=client.db(dbname);
@@ -32,29 +33,37 @@ MongoClient.connect('mongodb://localhost/COnfusionDatabase',{ useNewUrlParser: t
             });
         });
     });*/
+
     dboper.insertDocument(db, { name: "Vadonut", description: "Test"},
-        "dishes", (result) => {
-            console.log("Insert Document:\n", result.ops);
+    "dishes")
+    .then((result) => {
+        console.log("Insert Document:\n", result.ops);
 
-            dboper.findDocuments(db, "dishes", (docs) => {
-                console.log("Found Documents:\n", docs);
+        return dboper.findDocuments(db, "dishes");
+    })
+    .then((docs)=>{
+        console.log('found documents:\n',docs);
+        return dboper.updateDocument(db, { name: "Vadonut" },
+        { description: "Updated Test" }, "dishes")
+    })
+    .then((result)=>{
+        console.log('updated documents',result.result);
+        return dboper.findDocuments(db, "dishes");
+    })
+    .then((docs)=>{
+        console.log('found updated documents',docs);
+        return db.dropCollection("dishes");
+    })
+    .then((docs)=>{
+        console.log('dropped collections',docs);
+        client.close();
+    })
+    .catch((err)=>{
+        console.log(err);
+    })
+.catch((err)=>{
+    console.log(err);
+})
 
-                dboper.updateDocument(db, { name: "Vadonut" },
-                    { description: "Updated Test" }, "dishes",
-                    (result) => {
-                        console.log("Updated Document:\n", result.result);
-
-                        dboper.findDocuments(db, "dishes", (docs) => {
-                            console.log("Found Updated Documents:\n", docs);
-                            
-                            db.dropCollection("dishes", (result) => {
-                                console.log("Dropped Collection: ", result);
-
-                                client.close();
-                            });
-                        });
-                    });
-            });
     });
-});
 
