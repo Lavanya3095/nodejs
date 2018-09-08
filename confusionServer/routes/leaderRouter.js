@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const Leaders = require('../models/leaders');
+var authenticate = require('../authenticate');
 
 const leaderRouter = express.Router();
 
@@ -88,12 +89,12 @@ leaderRouter.route('/:leaderId')
     .catch((err)=>next(err));
 })
 
-.post((req, res, next) => {
+.post(authenticate.verifyUser,(req, res, next) => {
     res.statusCode = 403;
     res.end('POST operation not supported on /leaders/'+ req.params.leaderId);
   })
 
-.put((req, res, next) => {
+.put(authenticate.verifyUser,(req, res, next) => {
     Leaders.findByIdAndUpdate(req.params.leaderId,{$set: req.body},{new:true})
     .then((leaders)=>{
         console.log('leaders created',leaders);
@@ -104,7 +105,7 @@ leaderRouter.route('/:leaderId')
     .catch((err)=>next(err));
 })
 
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser,(req, res, next) => {
     Leaders.findByIdAndRemove(req.params.leaderId)
     .then((resp)=>{
         res.statusCode=200;
