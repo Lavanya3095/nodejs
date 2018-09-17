@@ -5,6 +5,7 @@ var User = require('../models/user');
 var passport = require('passport');
 var authenticate = require('../authenticate');
 
+
 router.use(bodyParser.json());
 
 /* GET users listing. */
